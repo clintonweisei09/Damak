@@ -1,0 +1,6 @@
+{
+  "name": "Damak Farm - Rare Produce & Heritage Farmstead",
+  "description": "Artisanal organic produce, rare seasonal heirloom crops, heritage guinea fowl, turkeys, rabbits, guinea pigs, and farmer husbandry advice. From Damak Farm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
