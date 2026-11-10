@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sprout, MapPin, Phone, Mail, ShieldCheck, MessageCircle, ArrowUp } from 'lucide-react';
+import { Sprout, MapPin, Phone, Mail, MessageCircle, ArrowUp } from 'lucide-react';
 
 interface FooterProps {
   onNavigateSection: (sectionId: string) => void;
@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateSection, onOpenFarmGat
 
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+254 797 736 534 (Farm Desk &amp; Orders)</span>
+                <span>+254722284640 (Farm Desk &amp; Orders)</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -51,10 +51,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateSection, onOpenFarmGat
                 <span>steward@damakfarm.com</span>
               </div>
 
-              <div className="flex items-center gap-2 text-amber-300 font-semibold pt-1">
-                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Official M-Pesa Merchant Shortcode: 1411049 (clinton)</span>
-              </div>
             </div>
           </div>
 
@@ -134,13 +130,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateSection, onOpenFarmGat
             </p>
 
             <a
-              href="https://wa.me/254797736534?text=Hello%20Damak%20Farm%20Turbo,%20I%20have%20an%20order%20inquiry"
+              href="https://wa.me/254722284640?text=Hello%20Damak%20Farm%20Turbo,%20I%20have%20an%20order%20inquiry"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00A34E] hover:bg-[#00B858] text-white rounded-xl text-xs font-black shadow-md transition-all active:scale-98"
             >
               <MessageCircle className="w-4 h-4 text-white" />
-              <span>WhatsApp (+254 797 736 534)</span>
+              <span>WhatsApp (+254722284640)</span>
             </a>
 
             <div className="pt-2 text-[11px] text-emerald-400/80">
