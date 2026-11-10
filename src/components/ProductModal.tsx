@@ -3,6 +3,7 @@ import { X, Check, ShieldCheck, MapPin, Truck, AlertCircle, Calendar, Plus, Minu
 import { Product } from '../types/farm';
 import { CATEGORY_LABELS } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface ProductModalProps {
   product: Product | null;
@@ -68,7 +69,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           {/* Left Column: Image & Provenance Badges */}
           <div className="relative bg-[#EFEAE2] min-h-[300px] md:min-h-full flex flex-col justify-between overflow-hidden">
             <img
-              src={product.image}
+              src={farmImageUrl(product.image)}
               alt={product.name}
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover object-center"

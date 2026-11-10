@@ -3,6 +3,7 @@ import { Search, ShoppingBag, Eye, Check, Sprout, Filter, Sparkles, Feather, Mes
 import { Product, ProductCategory } from '../types/farm';
 import { PRODUCTS, CATEGORY_LABELS } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface ProductCatalogProps {
   onSelectProduct: (product: Product) => void;
@@ -190,7 +191,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   {/* Lead with Imagery (65-70% visual focus) */}
                   <div className="relative aspect-[4/3] w-full bg-emerald-50 overflow-hidden">
                     <img
-                      src={product.image}
+                      src={farmImageUrl(product.image)}
                       alt={product.name}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"

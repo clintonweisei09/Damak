@@ -6,6 +6,7 @@ import {
 import { Product, ProductCategory } from '../types/farm';
 import { PRODUCTS } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface FarmSectorsShowcaseProps {
   onSelectProduct: (product: Product) => void;
@@ -181,7 +182,7 @@ export const FarmSectorsShowcase: React.FC<FarmSectorsShowcaseProps> = ({
                 }`}
               >
                 <img
-                  src={sec.image}
+                  src={farmImageUrl(sec.image)}
                   alt={sec.title}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
@@ -260,7 +261,7 @@ export const FarmSectorsShowcase: React.FC<FarmSectorsShowcaseProps> = ({
                       {/* Product Image */}
                       <div className="relative h-48 w-full overflow-hidden bg-emerald-950">
                         <img
-                          src={product.image}
+                          src={farmImageUrl(product.image)}
                           alt={product.name}
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"

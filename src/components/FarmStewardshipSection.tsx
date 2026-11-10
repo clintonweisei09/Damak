@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Heart, Droplets, Sun, Calendar, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface FarmStewardshipSectionProps {
   onOpenFarmGate: () => void;
@@ -18,7 +19,7 @@ export const FarmStewardshipSection: React.FC<FarmStewardshipSectionProps> = ({
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden border-2 border-emerald-200/90 shadow-xl bg-emerald-950">
               <img
-                src="/src/assets/images/damak_farm_owners_1792425696095.jpg"
+                src={farmImageUrl('/src/assets/images/damak_farm_owners_1792425696095.jpg')}
                 alt="Damak Farm founders and stewards inspecting organic vegetable harvests"
                 referrerPolicy="no-referrer"
                 className="w-full h-80 sm:h-[420px] object-cover object-center"

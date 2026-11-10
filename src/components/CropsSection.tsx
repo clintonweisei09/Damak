@@ -3,6 +3,7 @@ import { Sprout, Sun, Droplets, Sparkles, ArrowRight, ShieldCheck, Heart, Info, 
 import { FARM_CROPS, FarmCrop } from '../data/crops';
 import { Product } from '../types/farm';
 import { PRODUCTS } from '../data/products';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface CropsSectionProps {
   onAddToCart: (product: Product, quantity?: number) => void;
@@ -118,7 +119,7 @@ export const CropsSection: React.FC<CropsSectionProps> = ({
           <div className="lg:col-span-5 flex justify-center">
             <div className="relative w-full max-w-xs aspect-[3/4] rounded-t-full rounded-b-3xl overflow-hidden border-4 border-emerald-300 shadow-xl bg-emerald-950 group">
               <img
-                src="/src/assets/images/vibrant_crops_patch_1792426298694.jpg"
+                src={farmImageUrl('/src/assets/images/vibrant_crops_patch_1792426298694.jpg')}
                 alt="Vibrant colorful crops at Damak Farm in sunrise golden hour"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
@@ -301,7 +302,7 @@ export const CropsSection: React.FC<CropsSectionProps> = ({
                 {/* Crop Image Header (Non-Horizontal Portrait Frame) */}
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-emerald-50">
                   <img
-                    src={crop.image}
+                    src={farmImageUrl(crop.image)}
                     alt={crop.name}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
@@ -508,7 +509,7 @@ export const CropsSection: React.FC<CropsSectionProps> = ({
 
             <div className="relative aspect-square sm:aspect-[4/3] max-h-72 w-full bg-emerald-900 overflow-hidden">
               <img
-                src={inspectedCrop.image}
+                src={farmImageUrl(inspectedCrop.image)}
                 alt={inspectedCrop.name}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center"

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, Check, Sprout, ShoppingBag, Globe, GraduationCap, MapPin } from 'lucide-react';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface DamakEnterprisesGridProps {
   onSelectCategory: (category: string) => void;
@@ -106,7 +107,7 @@ export const DamakEnterprisesGrid: React.FC<DamakEnterprisesGridProps> = ({
               {/* Image banner */}
               <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-emerald-950">
                 <img
-                  src={item.image}
+                  src={farmImageUrl(item.image)}
                   alt={item.title}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"

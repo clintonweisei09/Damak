@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, MapPin, ShieldCheck } from 'lucide-react';
 import { CartItem, Product } from '../types/farm';
 import { useCurrency } from '../context/CurrencyContext';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -113,7 +114,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       className="p-3.5 bg-white rounded-xl border border-[#E3DBD0] flex gap-3 items-center justify-between"
                     >
                       <img
-                        src={item.product.image}
+                        src={farmImageUrl(item.product.image)}
                         alt={item.product.name}
                         referrerPolicy="no-referrer"
                         className="w-16 h-16 rounded-lg object-cover bg-[#EFEAE2] shrink-0"

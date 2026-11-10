@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ShieldCheck, Sprout, Sun, Calendar, Wheat, MessageCircle, MapPin } from 'lucide-react';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface HeroProps {
   onShopClick: () => void;
@@ -104,7 +105,7 @@ export const Hero: React.FC<HeroProps> = ({
           <div className="lg:col-span-5 relative">
             <div className="relative w-full h-[360px] sm:h-[420px] rounded-3xl overflow-hidden border-2 border-emerald-300/80 bg-emerald-950 shadow-xl group">
               <img
-                src="/src/assets/images/damak_chickens_1794209334968.jpg"
+                src={farmImageUrl('/src/assets/images/damak_chickens_1794209334968.jpg')}
                 alt="Damak Farm pastures with free-range poultry, waterfowl, and vegetable beds"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"

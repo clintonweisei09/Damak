@@ -3,6 +3,7 @@ import { BookOpen, HelpCircle, Check, ArrowRight, MessageSquare, ChevronDown, Ch
 import { AdviceArticle, FaqQuestion, Product } from '../types/farm';
 import { ADVICE_ARTICLES, FAQ_QUESTIONS, OWNER_INFO } from '../data/advice';
 import { PRODUCTS } from '../data/products';
+import { farmImageUrl } from '../assets/farmImageUrl';
 
 interface AdviceHubProps {
   onSelectProduct: (product: Product) => void;
@@ -90,7 +91,7 @@ export const AdviceHub: React.FC<AdviceHubProps> = ({ onSelectProduct }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
             <div className="lg:col-span-5 relative h-72 sm:h-96 lg:h-full bg-emerald-950">
               <img
-                src={OWNER_INFO.image}
+                src={farmImageUrl(OWNER_INFO.image)}
                 alt={OWNER_INFO.name}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-center"
@@ -247,7 +248,7 @@ export const AdviceHub: React.FC<AdviceHubProps> = ({ onSelectProduct }) => {
                         <div className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-[#DFD8CC]">
                           <div className="flex items-center gap-3">
                             <img
-                              src={relatedProduct.image}
+                              src={farmImageUrl(relatedProduct.image)}
                               alt={relatedProduct.name}
                               referrerPolicy="no-referrer"
                               className="w-12 h-12 rounded-lg object-cover bg-[#EFEAE2]"
