@@ -12,6 +12,29 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
+const allowedOrigins = new Set(
+  (process.env.FRONTEND_URL || 'https://clintonweisei09.github.io')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
+app.use((req, res, next) => {
+  const origin = req.get('Origin');
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.vary('Origin');
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(origin && !allowedOrigins.has(origin) ? 403 : 204);
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 const mpesaEnvironment = (process.env.MPESA_ENVIRONMENT || 'sandbox').trim().toLowerCase();
@@ -38,7 +61,7 @@ function getShortcodeConfig(requestedShortcode?: unknown): typeof mpesaConfig {
 }
 
 function getCallbackUrl() {
-  const appUrl = (process.env.APP_URL || '').trim().replace(/\/+$/, '');
+  const appUrl = (process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || '').trim().replace(/\/+$/, '');
   if (!appUrl) return null;
 
   try {
@@ -509,7 +532,6 @@ app.get('/api/mpesa/query/:checkoutRequestId', async (req, res) => {
           // Success! User entered PIN and transaction cleared
           record.status = 'COMPLETED';
           record.resultDesc = qData.ResultDesc || 'The service request is processed successfully.';
-          record.receiptNumber = record.receiptNumber || `QKH${Math.floor(100000 + Math.random() * 900000)}KES`;
         } else if (resultCodeStr === '1032') {
           // User explicitly cancelled the prompt on handset
           record.status = 'CANCELLED';
@@ -563,27 +585,6 @@ app.get('/api/mpesa/query/:checkoutRequestId', async (req, res) => {
     success: true,
     transaction: record,
   });
-});
-
-// Confirm/Authorize Simulated Transaction (For developer/sandbox testing)
-app.post('/api/mpesa/simulate-confirm', (req, res) => {
-  const { checkoutRequestId, approved } = req.body;
-  const record = transactions.get(checkoutRequestId);
-
-  if (!record) {
-    return res.status(404).json({ success: false, error: 'Transaction not found' });
-  }
-
-  if (approved) {
-    record.status = 'COMPLETED';
-    record.receiptNumber = `QKH${Math.floor(100000 + Math.random() * 900000)}KES`;
-    record.resultDesc = 'The service request is processed successfully.';
-  } else {
-    record.status = 'CANCELLED';
-    record.resultDesc = 'Request cancelled by customer.';
-  }
-
-  return res.json({ success: true, transaction: record });
 });
 
 // -------------------------------------------------------------

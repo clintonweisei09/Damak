@@ -3,6 +3,7 @@ import {
   Smartphone, CheckCircle2, AlertCircle, Loader2, RefreshCw, 
   Lock, Check, Zap, Sparkles, ShieldCheck, Clock, ArrowRight, X
 } from 'lucide-react';
+import { apiUrl } from '../lib/apiUrl';
 
 interface QuickStkScreenProps {
   isOpen?: boolean;
@@ -27,12 +28,10 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
   // STK Push State
   const [stkStatus, setStkStatus] = useState<'idle' | 'initiating' | 'waiting' | 'timeout' | 'failed' | 'success'>('idle');
   const [transitStep, setTransitStep] = useState<1 | 2 | 3>(1);
-  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(60);
   const [stkMessage, setStkMessage] = useState('');
   const [stkError, setStkError] = useState<string | null>(null);
   const [receiptNumber, setReceiptNumber] = useState<string | null>(null);
-  const [manualCode, setManualCode] = useState('');
 
   // Toast
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; title: string; message: string } | null>(null);
@@ -92,10 +91,10 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
     setTransitStep(1);
     setStkError(null);
     setCountdown(60);
-    setStkMessage(`Connecting to Safaricom Daraja Production (${finalType === 'CustomerBuyGoodsOnline' ? 'Till' : 'Paybill'} ${selectedShortcode})...`);
+    setStkMessage(`Connecting to Safaricom Daraja (${finalType === 'CustomerBuyGoodsOnline' ? 'Till' : 'Paybill'} ${selectedShortcode})...`);
 
     try {
-      const response = await fetch('/api/mpesa/stkpush', {
+      const response = await fetch(apiUrl('/api/mpesa/stkpush'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -120,10 +119,9 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
 
       setStkStatus('waiting');
       setTransitStep(2);
-      setCheckoutRequestId(data.checkoutRequestId);
 
       const isTill = finalType === 'CustomerBuyGoodsOnline';
-      const promptText = data.promptText || `Do you want to ${isTill ? 'buy goods' : 'pay'} KSh ${finalAmount.toLocaleString()} to clinton (${isTill ? 'Till' : 'Paybill'} ${selectedShortcode})?`;
+      const promptText = data.promptText || `Do you want to ${isTill ? 'buy goods' : 'pay'} KSh ${finalAmount.toLocaleString()} to Damak Farm (${isTill ? 'Till' : 'Paybill'} ${selectedShortcode})?`;
       setStkMessage(promptText);
 
       triggerToast(
@@ -155,13 +153,13 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
       const pollQuery = async () => {
         if (!data.checkoutRequestId) return;
         try {
-          const qRes = await fetch(`/api/mpesa/query/${data.checkoutRequestId}`);
+          const qRes = await fetch(apiUrl(`/api/mpesa/query/${data.checkoutRequestId}`));
           const qData = await qRes.json();
           if (qData.success && qData.transaction) {
             if (qData.transaction.status === 'COMPLETED') {
               if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
               if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-              handleSuccess(qData.transaction.receiptNumber || 'QKH' + Math.floor(100000 + Math.random() * 900000) + 'KES');
+              handleSuccess(qData.transaction.receiptNumber);
             } else if (qData.transaction.status === 'FAILED' || qData.transaction.status === 'CANCELLED') {
               if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
               if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
@@ -191,45 +189,13 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
     }
   };
 
-  const handleSuccess = (code: string) => {
-    setReceiptNumber(code);
+  const handleSuccess = (code?: string) => {
+    setReceiptNumber(code || null);
     setStkStatus('success');
-    triggerToast('success', 'Payment Confirmed!', `M-Pesa Receipt: ${code} verified.`);
+    triggerToast('success', 'Payment Confirmed!', code ? `M-Pesa Receipt: ${code} verified.` : 'Safaricom confirmed your payment.');
     if (onPaymentSuccess) {
-      onPaymentSuccess(code, activeFormattedPhone, amount);
+      onPaymentSuccess(code || '', activeFormattedPhone, amount);
     }
-  };
-
-  const handleManualAuthorize = async () => {
-    triggerToast('info', 'Authorizing...', 'Verifying payment with Safaricom network...');
-    if (!checkoutRequestId) {
-      handleSuccess('QKH' + Math.floor(100000 + Math.random() * 900000) + 'KES');
-      return;
-    }
-    try {
-      const res = await fetch('/api/mpesa/simulate-confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checkoutRequestId, approved: true }),
-      });
-      const data = await res.json();
-      if (data.success && data.transaction?.receiptNumber) {
-        handleSuccess(data.transaction.receiptNumber);
-      } else {
-        handleSuccess('QKH' + Math.floor(100000 + Math.random() * 900000) + 'KES');
-      }
-    } catch (e) {
-      handleSuccess('QKH' + Math.floor(100000 + Math.random() * 900000) + 'KES');
-    }
-  };
-
-  const handleManualReceiptSubmit = () => {
-    const code = manualCode.trim().toUpperCase();
-    if (!code || code.length < 5) {
-      triggerToast('error', 'Code Required', 'Please enter your M-Pesa SMS confirmation code (e.g. QKH82910...)');
-      return;
-    }
-    handleSuccess(code);
   };
 
   if (!isEmbedded && !isOpen) return null;
@@ -258,7 +224,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
               </span>
             </div>
             <p className="text-xs text-emerald-200/90 font-mono">
-              clinton · Shortcode {selectedShortcode}
+              Damak Farm · Shortcode {selectedShortcode}
             </p>
           </div>
         </div>
@@ -329,7 +295,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                   </span>
                 </div>
                 <p className="text-sm font-semibold text-white leading-relaxed">
-                  {stkMessage || `Do you want to ${shortcodeType === 'CustomerBuyGoodsOnline' ? 'buy goods' : 'pay'} KSh ${amount.toLocaleString()} to clinton (${shortcodeType === 'CustomerBuyGoodsOnline' ? 'Till' : 'Paybill'} ${selectedShortcode})?`}
+                  {stkMessage || `Do you want to ${shortcodeType === 'CustomerBuyGoodsOnline' ? 'buy goods' : 'pay'} KSh ${amount.toLocaleString()} to Damak Farm (${shortcodeType === 'CustomerBuyGoodsOnline' ? 'Till' : 'Paybill'} ${selectedShortcode})?`}
                 </p>
                 <div className="flex items-center gap-2 text-xs text-emerald-300/90 pt-1">
                   <Lock className="w-4 h-4 text-amber-400 shrink-0" />
@@ -337,15 +303,6 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                 </div>
               </div>
 
-              {/* Quick Authorize Button */}
-              <button
-                type="button"
-                onClick={handleManualAuthorize}
-                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg cursor-pointer transition-all flex items-center justify-center gap-2 active:scale-98"
-              >
-                <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                <span>Authorize Payment (Instant Clearance)</span>
-              </button>
             </div>
           )}
 
@@ -386,7 +343,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                 </button>
               </div>
 
-              {/* Manual fallback */}
+              {/* Manual payment instructions */}
               <div className="p-3 bg-black/60 rounded-xl border border-emerald-800 text-left text-[11px] space-y-1.5">
                 <div className="font-bold text-emerald-300">Option: Pay manually via M-Pesa on your phone:</div>
                 <div className="font-mono text-emerald-100 text-[10px]">
@@ -395,22 +352,6 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                   3. Amount: <strong>KSh {amount.toLocaleString()}</strong> &gt; Enter PIN
                 </div>
 
-                <div className="flex gap-2 pt-1">
-                  <input
-                    type="text"
-                    placeholder="Enter M-Pesa SMS Code (e.g. QKH...)"
-                    value={manualCode}
-                    onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-                    className="flex-1 px-3 py-1.5 bg-black/80 border border-emerald-600 rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleManualReceiptSubmit}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg cursor-pointer"
-                  >
-                    Verify
-                  </button>
-                </div>
               </div>
             </div>
           )}
@@ -434,13 +375,6 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                   <RefreshCw className="w-4 h-4" />
                   <span>Retry</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={handleManualAuthorize}
-                  className="flex-1 py-2.5 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-xl cursor-pointer"
-                >
-                  Confirm Order
-                </button>
               </div>
             </div>
           )}
@@ -454,7 +388,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
               <div>
                 <h3 className="font-bold text-lg text-white">Payment Authorized!</h3>
                 <p className="text-xs text-emerald-200 mt-1">
-                  Safaricom confirmed receipt: <strong className="font-mono text-amber-300 text-sm">{receiptNumber}</strong>
+                  {receiptNumber ? <>Safaricom confirmed receipt: <strong className="font-mono text-amber-300 text-sm">{receiptNumber}</strong></> : 'Safaricom confirmed your payment.'}
                 </p>
                 <p className="text-[11px] text-emerald-300/80 font-mono mt-0.5">
                   Amount: KSh {amount.toLocaleString()} · Line: +{activeFormattedPhone}
@@ -540,7 +474,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                   <span className="font-black text-sm text-white">Paybill 1411049</span>
                   <span className="text-[9px] bg-emerald-500 text-black font-black px-1.5 py-0.5 rounded">NEW</span>
                 </div>
-                <span className="text-[10px] text-emerald-300/80 block mt-0.5">Acc: {accountRef} (clinton)</span>
+                <span className="text-[10px] text-emerald-300/80 block mt-0.5">Acc: {accountRef}</span>
               </button>
 
               <button
@@ -558,7 +492,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                   <span className="font-black text-sm text-white">Till 1411049</span>
                   <span className="text-[9px] bg-amber-400 text-black font-black px-1.5 py-0.5 rounded">TILL</span>
                 </div>
-                <span className="text-[10px] text-emerald-300/80 block mt-0.5">Buy Goods (clinton)</span>
+                <span className="text-[10px] text-emerald-300/80 block mt-0.5">Buy Goods</span>
               </button>
             </div>
 

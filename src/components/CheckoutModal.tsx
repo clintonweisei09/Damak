@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { CartItem, OrderConfirmation } from '../types/farm';
 import { useCurrency } from '../context/CurrencyContext';
+import { apiUrl } from '../lib/apiUrl';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -37,12 +38,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isStkPromptOpen, setIsStkPromptOpen] = useState(false);
   const [stkStatus, setStkStatus] = useState<'initiating' | 'waiting' | 'timeout' | 'failed' | 'success'>('initiating');
   const [transitStep, setTransitStep] = useState<1 | 2 | 3>(1);
-  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(60);
   const [stkMessage, setStkMessage] = useState('');
   const [stkError, setStkError] = useState<string | null>(null);
   const [activeReceiptNumber, setActiveReceiptNumber] = useState<string | null>(null);
-  const [manualReceiptCode, setManualReceiptCode] = useState('');
 
   // Toast Notification
   const [toast, setToast] = useState<{
@@ -120,10 +119,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setTransitStep(1);
     setStkError(null);
     setCountdown(60);
-    setStkMessage(`Connecting to Safaricom Daraja API (Paybill 1411049 - clinton)...`);
+    setStkMessage('Connecting to Safaricom Daraja API...');
 
     try {
-      const response = await fetch('/api/mpesa/stkpush', {
+      const response = await fetch(apiUrl('/api/mpesa/stkpush'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -145,10 +144,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         throw new Error(rawText || 'Invalid response from payment gateway');
       }
 
-      if (data.checkoutRequestId) {
-        setCheckoutRequestId(data.checkoutRequestId);
-      }
-
       if (!response.ok || !data.success) {
         setStkStatus('failed');
         const errorMessage = data.error || 'Failed to dispatch M-Pesa STK Push prompt';
@@ -162,7 +157,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       setTransitStep(2);
       const promptText = data.promptText ||
         data.customerMessage ||
-        `Do you want to pay KSh ${chosenAmount.toLocaleString()} to clinton (1411049)? Enter 4-digit PIN:`;
+        `Do you want to pay KSh ${chosenAmount.toLocaleString()} to Damak Farm? Enter 4-digit PIN:`;
       setStkMessage(promptText);
 
       triggerToast(
@@ -197,7 +192,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       // Status polling every 3.5 seconds
       const pollQuery = async () => {
         try {
-          const queryRes = await fetch(`/api/mpesa/query/${data.checkoutRequestId}`);
+          const queryRes = await fetch(apiUrl(`/api/mpesa/query/${data.checkoutRequestId}`));
           const qContentType = queryRes.headers.get('content-type') || '';
           if (!qContentType.includes('application/json')) return;
           const queryData = await queryRes.json();
@@ -243,14 +238,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   // Finalize order after successful M-Pesa PIN authorization
   const finalizeMpesaOrder = (orderRef: string, paidPhone: string, receiptNo?: string) => {
-    const generatedReceipt = receiptNo || `QKH${Math.floor(100000 + Math.random() * 900000)}KES`;
-    setActiveReceiptNumber(generatedReceipt);
+    setActiveReceiptNumber(receiptNo || null);
     setStkStatus('success');
 
     triggerToast(
       'success',
       'Payment Authorized & Confirmed!',
-      `M-Pesa Receipt: ${generatedReceipt}. Your order has been placed!`
+      receiptNo ? `M-Pesa Receipt: ${receiptNo}. Your order has been placed!` : 'Safaricom confirmed your payment. Your order has been placed!'
     );
 
     const newOrder: OrderConfirmation = {
@@ -263,7 +257,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       pickupSlot: fulfillmentType === 'pickup' ? pickupSlot : undefined,
       notes: notes || undefined,
       paymentMethod: 'mpesa',
-      mpesaReceiptNumber: generatedReceipt,
+      mpesaReceiptNumber: receiptNo,
       mpesaPhone: paidPhone,
       items: [...cartItems],
       subtotal,
@@ -283,16 +277,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       setConfirmedOrder(newOrder);
       onOrderCompleted(newOrder);
     }, 1600);
-  };
-
-  // Allow manual SMS receipt code input
-  const handleManualReceiptSubmit = () => {
-    const code = manualReceiptCode.trim().toUpperCase();
-    if (!code || code.length < 5) {
-      triggerToast('error', 'Code Required', 'Please enter a valid M-Pesa SMS code (e.g. QKH...)');
-      return;
-    }
-    finalizeMpesaOrder('DF-HARVEST', mpesaPhone || phone, code);
   };
 
   const handleCancelStk = () => {
@@ -613,7 +597,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       Lipa Na M-Pesa (STK Push)
                     </h3>
                     <span className="text-[11px] text-[#255231] block font-mono">
-                      Paybill 1411049 · clinton
+                      Paybill 1411049 · Damak Farm
                     </span>
                   </div>
                 </div>
@@ -680,7 +664,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <span>💡 How it works:</span>
                 </div>
                 <p className="text-[11px] leading-relaxed">
-                  When you tap <strong>Pay via M-Pesa</strong>, Safaricom will immediately display an M-Pesa popup on your phone screen asking you to enter your <strong>4-digit M-Pesa PIN</strong> to pay <strong>KSh {totalInKES.toLocaleString()}</strong> to <strong>clinton (1411049)</strong>.
+                  When you tap <strong>Pay via M-Pesa</strong>, Safaricom will immediately display an M-Pesa popup on your phone screen asking you to enter your <strong>4-digit M-Pesa PIN</strong> to pay <strong>KSh {totalInKES.toLocaleString()}</strong> to <strong>Damak Farm (1411049)</strong>.
                 </p>
               </div>
             </div>
@@ -749,7 +733,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     )}
                   </h3>
                   <span className="text-xs text-emerald-300 block font-mono">
-                    clinton (Paybill 1411049) · KSh {totalInKES.toLocaleString()}
+                    Damak Farm (Paybill 1411049) · KSh {totalInKES.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -826,7 +810,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       Message on your screen:
                     </span>
                     <p className="text-xs sm:text-sm font-semibold text-white leading-relaxed">
-                      {stkMessage || `Do you want to pay KSh ${totalInKES.toLocaleString()} to clinton (1411049) Account DAMAKFARM? Enter PIN:`}
+                      {stkMessage || `Do you want to pay KSh ${totalInKES.toLocaleString()} to Damak Farm (1411049) Account DAMAKFARM? Enter PIN:`}
                     </p>
                     <div className="pt-1 flex items-center gap-2">
                       <span className="text-[10px] text-emerald-300/80 font-mono">M-Pesa PIN:</span>
@@ -843,17 +827,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     Look at your phone screen now. Enter your 4-digit M-Pesa PIN and press Send.
                   </p>
 
-                  {/* Immediate confirmation option */}
                   <div className="pt-2 border-t border-emerald-800/60 flex items-center justify-between gap-2">
-                    <span className="text-[10px] text-emerald-300/80">Entered PIN already?</span>
-                    <button
-                      type="button"
-                      onClick={() => finalizeMpesaOrder('DF-HARVEST', mpesaPhone || phone)}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition-all flex items-center gap-1 active:scale-95"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Confirm Order Now</span>
-                    </button>
+                    <span className="text-[10px] text-emerald-300/80">Safaricom will confirm your payment automatically.</span>
                   </div>
                 </div>
               </div>
@@ -903,27 +878,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <div>4. Amount: <strong className="text-emerald-300">KSh {totalInKES.toLocaleString()}</strong> &amp; Enter PIN</div>
                   </div>
 
-                  <div className="pt-1">
-                    <label className="block text-[10px] font-bold text-emerald-300 mb-1">
-                      Received M-Pesa SMS? Enter Confirmation Code:
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="e.g. QKH82910KL"
-                        value={manualReceiptCode}
-                        onChange={(e) => setManualReceiptCode(e.target.value.toUpperCase())}
-                        className="flex-1 px-3 py-2 bg-black/50 border border-emerald-600 rounded-xl text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-emerald-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleManualReceiptSubmit}
-                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors shrink-0"
-                      >
-                        Confirm
-                      </button>
-                    </div>
-                  </div>
+                  <p className="text-[10px] text-emerald-300/80">Manual payments are not confirmed here. Wait for the STK Push status or retry the prompt.</p>
                 </div>
               </div>
             )}
@@ -972,7 +927,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <div>
                   <h4 className="font-bold text-base text-white">Payment Authorized!</h4>
                   <p className="text-xs text-emerald-200 mt-1">
-                    Safaricom Receipt: <strong>{activeReceiptNumber}</strong>
+                    {activeReceiptNumber ? <>Safaricom Receipt: <strong>{activeReceiptNumber}</strong></> : 'Safaricom confirmed your payment.'}
                   </p>
                 </div>
               </div>
@@ -988,7 +943,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 Cancel
               </button>
               <span className="text-[10px] text-emerald-400/80 font-mono">
-                Safaricom Paybill 1411049 (clinton)
+                Safaricom Paybill 1411049
               </span>
             </div>
           </div>
