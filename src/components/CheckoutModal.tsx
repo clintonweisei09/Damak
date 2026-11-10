@@ -653,7 +653,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     </span>
                   ) : (
                     <span className="text-[#55695C] font-mono">
-                      Enter 9 or 10 digits (e.g. 0797736534)
+                      Enter your 9 or 10-digit number (e.g. 07XXXXXXXX)
                     </span>
                   )}
 

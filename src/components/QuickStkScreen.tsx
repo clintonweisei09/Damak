@@ -75,7 +75,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
       return;
     }
     if (!isPhoneValid) {
-      triggerToast('error', 'Invalid Phone', 'Please provide a valid 9 or 10-digit Kenyan Safaricom line (e.g. 0797736534)');
+      triggerToast('error', 'Invalid Phone', 'Please provide a valid 9 or 10-digit Kenyan Safaricom line (e.g. 07XXXXXXXX).');
       return;
     }
     if (finalAmount <= 0) {
