@@ -24,15 +24,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const { formatPrice } = useCurrency();
   const [fulfillmentType, setFulfillmentType] = useState<'pickup' | 'delivery'>(defaultFulfillment);
-  const [name, setName] = useState('Clinton');
-  const [email, setEmail] = useState('clintonweisei03@gmail.com');
-  const [phone, setPhone] = useState('0797736534');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('Turbo, Eldoret, Kenya');
   const [pickupSlot, setPickupSlot] = useState('Saturday 10:00 AM - 1:00 PM');
   const [notes, setNotes] = useState('');
   
-  // STK Push Phone (pre-filled with customer phone)
-  const [mpesaPhone, setMpesaPhone] = useState('0797736534');
+  const [mpesaPhone, setMpesaPhone] = useState('');
 
   // STK Push Progress & Modal State
   const [isStkPromptOpen, setIsStkPromptOpen] = useState(false);
@@ -80,13 +79,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
   const activeFormattedPhone = cleanKenyanPhone(mpesaPhone || phone);
   const isPhoneValid = /^254[17]\d{8}$/.test(activeFormattedPhone);
-
-  // Sync mpesaPhone with customer phone
-  useEffect(() => {
-    if (!mpesaPhone && phone) {
-      setMpesaPhone(phone);
-    }
-  }, [phone, mpesaPhone]);
 
   // Clean up timers on unmount
   useEffect(() => {
@@ -317,8 +309,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     if (!name || !email || !phone) return;
     if (fulfillmentType === 'delivery' && !address) return;
 
-    const targetPhone = mpesaPhone || phone;
-    initiateMpesaStkPush(targetPhone, `DF-${Math.floor(1000 + Math.random() * 9000)}`);
+    if (!isPhoneValid) {
+      triggerToast('error', 'Invalid Phone', 'Enter a valid 9 or 10-digit Kenyan mobile number for the STK Push.');
+      return;
+    }
+
+    initiateMpesaStkPush(mpesaPhone, `DF-${Math.floor(1000 + Math.random() * 9000)}`);
   };
 
   const handlePrint = () => {
@@ -639,7 +635,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <input
                     type="tel"
                     required
-                    placeholder="0797 736 534 or 07XXXXXXXX"
+                    placeholder="07XX XXX XXX"
                     value={mpesaPhone}
                     onChange={(e) => {
                       setMpesaPhone(e.target.value);

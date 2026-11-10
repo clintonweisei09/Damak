@@ -17,8 +17,7 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
   isEmbedded = false,
   onPaymentSuccess,
 }) => {
-  // Input fields - pre-filled with Clinton's details
-  const [phone, setPhone] = useState('0797736534');
+  const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState<number>(1);
   const [customAmount, setCustomAmount] = useState('1');
   const selectedShortcode = '1411049';
@@ -513,7 +512,8 @@ export const QuickStkScreen: React.FC<QuickStkScreenProps> = ({
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="0797 736 534 or 01..."
+                placeholder="07XX XXX XXX or 01XX XXX XXX"
+                required
                 className="w-full pl-22 pr-4 py-3 bg-black/60 border-2 border-emerald-500/70 rounded-2xl text-base font-mono font-bold text-white placeholder-emerald-600/50 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all"
               />
             </div>
