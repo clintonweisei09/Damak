@@ -208,7 +208,7 @@ export const FarmSectorsShowcase: React.FC<FarmSectorsShowcaseProps> = ({
                     <span>·</span>
                     <span className="text-amber-800 font-serif italic">Kenyan Provenance</span>
                   </div>
-                  <h3 className="font-serif text-2xl sm:text-3xl font-black text-[#0D381E] tracking-tight mb-2 flex items-center gap-2">
+                  <h3 className="font-serif text-2xl sm:text-3xl font-black text-[#E07A7A] tracking-tight mb-2 flex items-center gap-2">
                     <span>{sec.title}</span>
                   </h3>
                   <p className="text-sm sm:text-base text-[#2E4735] leading-relaxed mb-4">
